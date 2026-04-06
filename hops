@@ -78,6 +78,49 @@ function hops() {
     brew update
     echo "$(date +%s)" > "$HOME/.hops_last_update"
     echo ""
+    
+    # Get list of outdated packages
+    local outdated=$(brew outdated)
+    if [[ -z "$outdated" ]]; then
+      echo -e "${GREEN}All packages are up to date!${NC}"
+      return 0
+    fi
+    
+    echo -e "${YELLOW}The following packages will be upgraded:${NC}"
+    echo ""
+    
+    # Parse and display outdated packages with versions
+    local -a pkg_array
+    while IFS= read -r line; do
+      [[ -z "$line" ]] && continue
+      pkg_array+=("$line")
+    done <<< "$outdated"
+    
+    local max_name_len=0
+    for line in "${pkg_array[@]}"; do
+      local pkg_name=$(echo "$line" | awk '{print $1}')
+      if (( ${#pkg_name} > max_name_len )); then
+        max_name_len=${#pkg_name}
+      fi
+    done
+    
+    for line in "${pkg_array[@]}"; do
+      local pkg_name=$(echo "$line" | awk '{print $1}')
+      local current_ver=$(echo "$line" | awk '{print $2}')
+      local latest_ver=$(echo "$line" | awk '{print $4}')
+      printf "  ${GREEN}%-${max_name_len}s${NC}  ${CYAN}[%s → %s]${NC}\n" "$pkg_name" "$current_ver" "$latest_ver"
+    done
+    
+    echo ""
+    echo -n "${YELLOW}Proceed with upgrade? [y/N]: ${NC}"
+    read -r confirm
+    
+    if [[ "$confirm" != "y" && "$confirm" != "Y" ]]; then
+      echo -e "${YELLOW}Cancelled.${NC}"
+      return 0
+    fi
+    
+    echo ""
     echo -e "${YELLOW}Upgrading packages...${NC}"
     brew upgrade
     echo ""
