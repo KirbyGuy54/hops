@@ -80,7 +80,7 @@ function hops() {
     echo ""
     
     # Get list of outdated packages
-    local outdated=$(brew outdated)
+    local outdated=$(brew outdated --verbose)
     if [[ -z "$outdated" ]]; then
       echo -e "${GREEN}All packages are up to date!${NC}"
       return 0
@@ -106,7 +106,7 @@ function hops() {
     
     for line in "${pkg_array[@]}"; do
       local pkg_name=$(echo "$line" | awk '{print $1}')
-      local current_ver=$(echo "$line" | awk '{print $2}')
+      local current_ver=$(echo "$line" | awk '{print $2}' | tr -d '()')
       local latest_ver=$(echo "$line" | awk '{print $4}')
       printf "  ${GREEN}%-${max_name_len}s${NC}  ${CYAN}[%s → %s]${NC}\n" "$pkg_name" "$current_ver" "$latest_ver"
     done
