@@ -113,10 +113,17 @@ function hops() {
     
     echo ""
     echo -n "${YELLOW}Proceed with upgrade? [y/N]: ${NC}"
-    read -r confirm
-    
-    if [[ "$confirm" != "y" && "$confirm" != "Y" ]]; then
-      echo -e "${YELLOW}Cancelled.${NC}"
+    read -k1 confirm
+    echo ""
+    if [[ "${confirm}" =~ [yY] ]]; then
+      # Proceed with upgrade
+    else
+      if [[ "${confirm}" == $'\n' ]]; then
+        echo "${YELLOW}Cancelled.${NC}"
+      else
+        echo ""
+        echo "${YELLOW}Cancelled.${NC}"
+      fi
       return 0
     fi
     
